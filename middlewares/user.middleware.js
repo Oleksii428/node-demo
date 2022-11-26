@@ -1,28 +1,25 @@
-const {fileServices} = require("../services");
-const ApiError = require("../error/ApiError");
+const {userService} = require("../services");
+const ApiError = require("../errors/ApiError");
 
 module.exports = {
 	isUserExists: async (req, res, next) => {
 		try {
 			const {userId} = req.params;
 
-			const users = await fileServices.reader();
-
-			const user = users.find((u) => u.id === +userId);
+			const user = await userService.getOneByParams({_id: userId});
 
 			if (!user) {
 				throw new ApiError(`user width id ${userId} not found`, 404);
 			}
 
 			req.user = user;
-			req.users = users;
 
 			next();
 		} catch (e) {
 			next(e);
 		}
 	},
-	isBodyValidCreate: async (req, res, next) => {
+	isBodyCreateValid: async (req, res, next) => {
 		try {
 			const userInfo = req.body;
 
@@ -33,12 +30,13 @@ module.exports = {
 			if (userInfo.age < 0 || Number.isNaN(+userInfo.age)) {
 				throw new ApiError("wrong age", 400);
 			}
+
 			next();
 		} catch (e) {
 			next(e);
 		}
 	},
-	isBodyValidUpdate: async (req, res, next) => {
+	isBodyUpdateValid: async (req, res, next) => {
 		try {
 			const {name, age} = req.body;
 
@@ -58,9 +56,29 @@ module.exports = {
 		try {
 			const {userId} = req.params;
 
-			if (userId < 0 || Number.isNaN(+userId)) {
-				throw new ApiError("invalid id", 404);
+			// if (userId < 0 || Number.isNaN(+userId)) {
+			// 	throw new ApiError("invalid id", 404);
+			// }
+
+			next();
+		} catch (e) {
+			next(e);
+		}
+	},
+	isEmailUnique: async (req, res, next) => {
+		try {
+			const {email} = req.body;
+
+			if (!email) {
+				throw new ApiError("Email is required", 400);
 			}
+
+			const user = await userService.getOneByParams({email});
+
+			if (user) {
+				throw new ApiError("User with this email is already exists", 409);
+			}
+
 			next();
 		} catch (e) {
 			next(e);
