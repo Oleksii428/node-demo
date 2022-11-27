@@ -1,5 +1,7 @@
 const {userService} = require("../services");
 const ApiError = require("../errors/ApiError");
+const commonValidators = require("../validators/common.validators");
+const {userValidator, updateUserValidator} = require("../validators/user.validator");
 
 module.exports = {
 	isUserExists: async (req, res, next) => {
@@ -22,14 +24,13 @@ module.exports = {
 	isBodyCreateValid: async (req, res, next) => {
 		try {
 			const userInfo = req.body;
+			const validate = userValidator.validate(userInfo);
 
-			if (userInfo.name.length < 3 || typeof userInfo.name !== "string") {
-				throw new ApiError("wrong name", 400);
+			if (validate.error) {
+				throw new ApiError(validate.error.message, 400);
 			}
 
-			if (userInfo.age < 0 || Number.isNaN(+userInfo.age)) {
-				throw new ApiError("wrong age", 400);
-			}
+			req.body = validate.value;
 
 			next();
 		} catch (e) {
@@ -38,27 +39,29 @@ module.exports = {
 	},
 	isBodyUpdateValid: async (req, res, next) => {
 		try {
-			const {name, age} = req.body;
+			const updateInfo = req.body;
+			const validate = updateUserValidator.validate(updateInfo);
 
-			if (name && (name.length < 3 || typeof name !== "string")) {
-				throw new ApiError("wrong name", 400);
+			if (validate.error) {
+				throw new ApiError(validate.error.message, 400);
 			}
 
-			if (age && (age < 0 || Number.isNaN(+age))) {
-				throw new ApiError("wrong age", 400);
-			}
+			req.body = validate.value;
+
 			next();
 		} catch (e) {
 			next(e);
 		}
 	},
-	isIdValid: (req, res, next) => {
+	isMongoIdValid: (req, res, next) => {
 		try {
 			const {userId} = req.params;
 
-			// if (userId < 0 || Number.isNaN(+userId)) {
-			// 	throw new ApiError("invalid id", 404);
-			// }
+			const validate = commonValidators.idValidator.validate(userId);
+
+			if (validate.error) {
+				throw new ApiError(validate.error.message, 400);
+			}
 
 			next();
 		} catch (e) {
