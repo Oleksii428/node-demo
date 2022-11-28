@@ -1,4 +1,5 @@
 const {oauthService} = require("../services");
+const OAuthSchema = require("../dataBases/Oauth");
 
 module.exports = {
 	login: async (req, res, next) => {
@@ -7,7 +8,11 @@ module.exports = {
 
 			await oauthService.comparePasswords(user.password, body.password);
 
-			res.json("login completed");
+			const tokenPair = oauthService.generateAccessTokenPair({id: user._id});
+
+			await OAuthSchema.create({...tokenPair, _user_id: user.id});
+
+			res.json({user, ...tokenPair});
 		} catch (e) {
 			next(e);
 		}
