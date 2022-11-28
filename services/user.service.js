@@ -13,7 +13,7 @@ module.exports = {
 	updateById: async (userId, newData) => {
 		return User.findByIdAndUpdate(userId, newData, {new: true});
 	},
-	deleteOne: async (userId) => {
+	deleteById: async (userId) => {
 		return User.deleteOne({_id: userId});
 	}
 };

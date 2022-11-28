@@ -1,17 +1,17 @@
 const {userService} = require("../services");
 const ApiError = require("../errors/ApiError");
 const commonValidators = require("../validators/common.validators");
-const {userValidator, updateUserValidator} = require("../validators/user.validator");
+const {createUserValidator, updateUserValidator} = require("../validators/user.validator");
 
 module.exports = {
-	isUserExists: async (req, res, next) => {
+	isUserExistsDynamically: (fieldName, from = "body", dbField = fieldName) => async (req, res, next) => {
 		try {
-			const {userId} = req.params;
+			const fieldToSearch = req[from][fieldName];
 
-			const user = await userService.getOneByParams({_id: userId});
+			const user = await userService.getOneByParams({[dbField]: fieldToSearch});
 
 			if (!user) {
-				throw new ApiError(`user width id ${userId} not found`, 404);
+				throw new ApiError(`user width ${dbField} ${fieldToSearch} not found`, 400);
 			}
 
 			req.user = user;
@@ -20,11 +20,13 @@ module.exports = {
 		} catch (e) {
 			next(e);
 		}
+
+
 	},
 	isBodyCreateValid: async (req, res, next) => {
 		try {
 			const userInfo = req.body;
-			const validate = userValidator.validate(userInfo);
+			const validate = createUserValidator.validate(userInfo);
 
 			if (validate.error) {
 				throw new ApiError(validate.error.message, 400);
