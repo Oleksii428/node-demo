@@ -16,5 +16,20 @@ module.exports = {
 		} catch (e) {
 			next(e);
 		}
+	},
+	refresh: async (req, res, next) => {
+		try {
+			const {refreshToken, _user_id} = req.tokenInfo;
+
+			await OAuthSchema.deleteOne({refreshToken});
+
+			const tokenPair = oauthService.generateAccessTokenPair({id: _user_id});
+
+			await OAuthSchema.create({...tokenPair, _user_id});
+
+			res.status(201).json(tokenPair);
+		} catch (e) {
+			next(e);
+		}
 	}
 };

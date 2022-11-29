@@ -3,6 +3,7 @@ const jwt = require("jsonwebtoken");
 const configs = require("../configs/config");
 const bcrypt = require("bcrypt");
 const ApiError = require("../errors/ApiError");
+const {tokenTypeEnum} = require("../enums");
 
 module.exports = {
 	hashPassword: (password) => bcrypt.hash(password, 10),
@@ -14,12 +15,24 @@ module.exports = {
 		}
 	},
 	generateAccessTokenPair: (dataToSign = {}) => {
-		const accessToken = jwt.sign(dataToSign, configs.SECRET_ACCESS_WORD, {expiresIn: "15m"});
-		const refreshToken = jwt.sign(dataToSign, configs.SECRET_REFRESH_WORD, {expiresIn: "30m"});
+		const accessToken = jwt.sign(dataToSign, configs.ACCESS_SECRET, {expiresIn: "10m"});
+		const refreshToken = jwt.sign(dataToSign, configs.REFRESH_SECRET, {expiresIn: "30d"});
 
 		return {
 			accessToken,
 			refreshToken
 		};
+	},
+	checkToken: (token = "", tokenType = tokenTypeEnum.accessToken) => {
+		try {
+			let secret = "";
+
+			if (tokenType === tokenTypeEnum.accessToken) secret = configs.ACCESS_SECRET;
+			else if (tokenType === tokenTypeEnum.refreshToken) secret = configs.REFRESH_SECRET;
+
+			return jwt.verify(token, secret);
+		} catch (e) {
+			throw new ApiError("Token not valid", 401);
+		}
 	}
 };

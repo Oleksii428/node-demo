@@ -7,6 +7,7 @@ const {
 	isEmailUnique,
 	isUserExistsDynamically
 } = require("../middlewares/user.middleware");
+const authMiddleware = require("../middlewares/auth.middleware");
 
 router.get("/", controller.getAll);
 router.post("/", isBodyCreateValid, isEmailUnique, controller.create);
@@ -14,12 +15,14 @@ router.post("/", isBodyCreateValid, isEmailUnique, controller.create);
 router.get(
 	"/:userId",
 	isMongoIdValid,
+	authMiddleware.checkAccessToken,
 	isUserExistsDynamically("userId", "params", "_id"),
 	controller.getById
 );
 router.put(
 	"/:userId",
 	isMongoIdValid,
+	authMiddleware.checkAccessToken,
 	isUserExistsDynamically("userId", "params", "_id"),
 	isBodyUpdateValid,
 	controller.update
@@ -27,6 +30,7 @@ router.put(
 router.delete(
 	"/:userId",
 	isMongoIdValid,
+	authMiddleware.checkAccessToken,
 	isUserExistsDynamically("userId", "params", "_id"),
 	controller.delete
 );
