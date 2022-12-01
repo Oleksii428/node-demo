@@ -1,4 +1,5 @@
 const Joi = require("joi");
+
 const regex = require("../configs/regex");
 
 module.exports = {

@@ -1,7 +1,6 @@
 const {userService} = require("../services");
+const {commonValidator, userValidator} = require("../validators");
 const ApiError = require("../errors/ApiError");
-const commonValidators = require("../validators/common.validators");
-const {createUserValidator, updateUserValidator} = require("../validators/user.validator");
 
 module.exports = {
 	isUserExistsDynamically: (fieldName, from = "body", dbField = fieldName) => async (req, res, next) => {
@@ -26,7 +25,7 @@ module.exports = {
 	isBodyCreateValid: async (req, res, next) => {
 		try {
 			const userInfo = req.body;
-			const validate = createUserValidator.validate(userInfo);
+			const validate = userValidator.createUserValidator.validate(userInfo);
 
 			if (validate.error) {
 				throw new ApiError(validate.error.message, 400);
@@ -42,7 +41,7 @@ module.exports = {
 	isBodyUpdateValid: async (req, res, next) => {
 		try {
 			const updateInfo = req.body;
-			const validate = updateUserValidator.validate(updateInfo);
+			const validate = userValidator.updateUserValidator.validate(updateInfo);
 
 			if (validate.error) {
 				throw new ApiError(validate.error.message, 400);
@@ -59,7 +58,7 @@ module.exports = {
 		try {
 			const {userId} = req.params;
 
-			const validate = commonValidators.idValidator.validate(userId);
+			const validate = commonValidator.idValidator.validate(userId);
 
 			if (validate.error) {
 				throw new ApiError(validate.error.message, 400);

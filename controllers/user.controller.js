@@ -16,6 +16,15 @@ module.exports = {
 			next(e);
 		}
 	},
+	getByIdWidthCars: async (req, res, next) => {
+		try {
+			const user = await userService.getByIdWidthCars(req.user._id);
+
+			res.json(user);
+		} catch (e) {
+			next(e);
+		}
+	},
 	create: async (req, res, next) => {
 		try {
 			const hashPassword = await oauthService.hashPassword(req.body.password);

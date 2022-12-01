@@ -1,5 +1,5 @@
 const {oauthService} = require("../services");
-const OAuthSchema = require("../dataBases/Oauth");
+const {OAuth} = require("../dataBases");
 
 module.exports = {
 	login: async (req, res, next) => {
@@ -10,7 +10,7 @@ module.exports = {
 
 			const tokenPair = oauthService.generateAccessTokenPair({id: user._id});
 
-			await OAuthSchema.create({...tokenPair, _user_id: user.id});
+			await OAuth.create({...tokenPair, _user_id: user.id});
 
 			res.json({user, ...tokenPair});
 		} catch (e) {
@@ -21,11 +21,11 @@ module.exports = {
 		try {
 			const {refreshToken, _user_id} = req.tokenInfo;
 
-			await OAuthSchema.deleteOne({refreshToken});
+			await OAuth.deleteOne({refreshToken});
 
 			const tokenPair = oauthService.generateAccessTokenPair({id: _user_id});
 
-			await OAuthSchema.create({...tokenPair, _user_id});
+			await OAuth.create({...tokenPair, _user_id});
 
 			res.status(201).json(tokenPair);
 		} catch (e) {

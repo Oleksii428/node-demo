@@ -2,7 +2,7 @@ require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
 
-const {userRouter, authRouter} = require("./routers");
+const {authRouter, carRouter, userRouter} = require("./routers");
 const configs = require("./configs/config");
 
 const app = express();
@@ -11,6 +11,7 @@ app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 
 app.use("/users", userRouter);
+app.use("/cars", carRouter);
 app.use("/auth", authRouter);
 
 app.get("/", (req, res) => {

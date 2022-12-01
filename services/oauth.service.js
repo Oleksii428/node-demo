@@ -1,7 +1,7 @@
 const jwt = require("jsonwebtoken");
+const bcrypt = require("bcrypt");
 
 const configs = require("../configs/config");
-const bcrypt = require("bcrypt");
 const ApiError = require("../errors/ApiError");
 const {tokenTypeEnum} = require("../enums");
 

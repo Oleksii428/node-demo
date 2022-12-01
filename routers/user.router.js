@@ -1,38 +1,38 @@
 const router = require("express").Router();
-const controller = require("../controllers/user.controller");
-const {
-	isMongoIdValid,
-	isBodyUpdateValid,
-	isBodyCreateValid,
-	isEmailUnique,
-	isUserExistsDynamically
-} = require("../middlewares/user.middleware");
-const authMiddleware = require("../middlewares/auth.middleware");
+const {userController} = require("../controllers");
+const {authMiddleware, userMiddleware} = require("../middlewares")
 
-router.get("/", controller.getAll);
-router.post("/", isBodyCreateValid, isEmailUnique, controller.create);
+router.get("/", userController.getAll);
+router.post("/", userMiddleware.isBodyCreateValid, userMiddleware.isEmailUnique, userController.create);
 
 router.get(
 	"/:userId",
-	isMongoIdValid,
+	userMiddleware.isMongoIdValid,
 	authMiddleware.checkAccessToken,
-	isUserExistsDynamically("userId", "params", "_id"),
-	controller.getById
+	userMiddleware.isUserExistsDynamically("userId", "params", "_id"),
+	userController.getById
 );
 router.put(
 	"/:userId",
-	isMongoIdValid,
+	userMiddleware.isMongoIdValid,
 	authMiddleware.checkAccessToken,
-	isUserExistsDynamically("userId", "params", "_id"),
-	isBodyUpdateValid,
-	controller.update
+	userMiddleware.isUserExistsDynamically("userId", "params", "_id"),
+	userMiddleware.isBodyUpdateValid,
+	userController.update
 );
 router.delete(
 	"/:userId",
-	isMongoIdValid,
+	userMiddleware.isMongoIdValid,
 	authMiddleware.checkAccessToken,
-	isUserExistsDynamically("userId", "params", "_id"),
-	controller.delete
+	userMiddleware.isUserExistsDynamically("userId", "params", "_id"),
+	userController.delete
+);
+router.get(
+	"/wcars/:userId",
+	userMiddleware.isMongoIdValid,
+	authMiddleware.checkAccessToken,
+	userMiddleware.isUserExistsDynamically("userId", "params", "_id"),
+	userController.getByIdWidthCars
 );
 
 module.exports = router;

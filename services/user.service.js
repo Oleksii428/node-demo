@@ -1,4 +1,4 @@
-const User = require("../dataBases/User");
+const {User} = require("../dataBases");
 
 module.exports = {
 	getByParams: async (filter = {}) => {
@@ -6,6 +6,23 @@ module.exports = {
 	},
 	getOneByParams: async (filter = {}) => {
 		return User.findOne(filter);
+	},
+	getByIdWidthCars: async (userId) => {
+		return User.aggregate([
+			{
+				$match: {
+					_id: userId
+				}
+			},
+			{
+				$lookup: {
+					from: "cars",
+					localField: "_id",
+					foreignField: "_user_id",
+					as: "cars"
+				}
+			}
+		]);
 	},
 	create: async (newUser) => {
 		return User.create(newUser);

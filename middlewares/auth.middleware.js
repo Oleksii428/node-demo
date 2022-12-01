@@ -1,8 +1,8 @@
-const authValidator = require("../validators/auth.validator");
-const ApiError = require("../errors/ApiError");
+const {authValidator} = require("../validators");
 const {oauthService} = require("../services");
-const Oauth = require("../dataBases/Oauth");
+const {OAuth} = require("../dataBases");
 const {tokenTypeEnum} = require("../enums");
+const ApiError = require("../errors/ApiError");
 
 module.exports = {
 	isBodyValid: async (req, res, next) => {
@@ -28,7 +28,7 @@ module.exports = {
 
 			oauthService.checkToken(accessToken);
 
-			const tokenInDB = Oauth.findOne({accessToken});
+			const tokenInDB = OAuth.findOne({accessToken});
 
 			if (!tokenInDB) {
 				throw new ApiError("No token in data base", 401);
@@ -49,7 +49,7 @@ module.exports = {
 
 			oauthService.checkToken(refreshToken, tokenTypeEnum.refreshToken);
 
-			const tokenInfo = Oauth.findOne({refreshToken});
+			const tokenInfo = OAuth.findOne({refreshToken});
 
 			if (!tokenInfo) {
 				throw new ApiError("No token in data base", 401);
