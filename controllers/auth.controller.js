@@ -1,7 +1,31 @@
-const {oauthService} = require("../services");
+const {emailService, oauthService} = require("../services");
 const {OAuth} = require("../dataBases");
+const {CONTENT, FORGOT_PASS} = require("../configs/email.actions");
 
 module.exports = {
+	sendEmail: async (req, res, next) => {
+		try {
+			const user = {
+				name: "Vasia",
+				age: 22,
+				email: "wifi5324518@gmail.com"
+			}
+			await emailService.sendEmail(user.email, CONTENT, {userName: user.name});
+
+			res.json("Sanded");
+		} catch (e) {
+			next(e);
+		}
+	},
+	sendEmail2: async (req, res, next) => {
+		try {
+			await emailService.sendEmail("wifi5324518@gmail.com", FORGOT_PASS);
+
+			res.json("Sanded");
+		} catch (e) {
+			next(e);
+		}
+	},
 	login: async (req, res, next) => {
 		try {
 			const {user, body} = req;
