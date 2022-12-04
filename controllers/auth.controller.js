@@ -9,7 +9,7 @@ module.exports = {
 				name: "Vasia",
 				age: 22,
 				email: "wifi5324518@gmail.com"
-			}
+			};
 			await emailService.sendEmail(user.email, CONTENT, {userName: user.name});
 
 			res.json("Sanded");
@@ -52,6 +52,29 @@ module.exports = {
 			await OAuth.create({...tokenPair, _user_id});
 
 			res.status(201).json(tokenPair);
+		} catch (e) {
+			next(e);
+		}
+	},
+	logout: async (req, res, next) => {
+		try {
+			const {accessToken} = req.tokenInfo;
+
+			await OAuth.deleteOne({accessToken});
+
+			res.sendStatus(204);
+		} catch (e) {
+			next(e);
+		}
+	},
+	logoutAll: async (req, res, next) => {
+		try {
+			const {_user_id} = req.tokenInfo;
+			console.log(_user_id);
+
+			await OAuth.deleteMany({_user_id});
+
+			res.sendStatus(204);
 		} catch (e) {
 			next(e);
 		}

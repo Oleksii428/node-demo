@@ -28,18 +28,20 @@ module.exports = {
 
 			oauthService.checkToken(accessToken);
 
-			const tokenInDB = OAuth.findOne({accessToken});
+			const tokenInfo = OAuth.findOne({accessToken});
 
-			if (!tokenInDB) {
+			if (!tokenInfo) {
 				throw new ApiError("No token in data base", 401);
 			}
+
+			req.tokenInfo = tokenInfo;
 
 			next();
 		} catch (e) {
 			next(e);
 		}
 	},
-	checkRefreshToken: (req, res, next) => {
+		checkRefreshToken: (req, res, next) => {
 		try {
 			const refreshToken = req.get("Authorization");
 

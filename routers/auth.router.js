@@ -6,6 +6,9 @@ router.post("/login", authMiddleware.isBodyValid, userMiddleware.isUserExistsDyn
 
 router.post("/refresh", authMiddleware.checkRefreshToken, authController.refresh);
 
+router.post("/logout", authMiddleware.checkAccessToken, authController.logout);
+router.post("/logoutAll", authMiddleware.checkAccessToken, authController.logoutAll);
+
 router.post("/email", authController.sendEmail);
 router.post("/email2", authController.sendEmail2);
 
