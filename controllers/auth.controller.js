@@ -1,6 +1,7 @@
-const {emailService, oauthService} = require("../services");
+const {emailService, oauthService, userService, actionTokenService} = require("../services");
 const {OAuth} = require("../dataBases");
-const {CONTENT, FORGOT_PASS} = require("../configs/email.actions");
+const {tokenActionsEnum, emailActions} = require("../enums");
+const {FRONTEND_URL} = require("../configs/config");
 
 module.exports = {
 	sendEmail: async (req, res, next) => {
@@ -10,7 +11,7 @@ module.exports = {
 				age: 22,
 				email: "wifi5324518@gmail.com"
 			};
-			await emailService.sendEmail(user.email, CONTENT, {userName: user.name});
+			await emailService.sendEmail(user.email, emailActions.CONTENT, {userName: user.name});
 
 			res.json("Sanded");
 		} catch (e) {
@@ -19,7 +20,7 @@ module.exports = {
 	},
 	sendEmail2: async (req, res, next) => {
 		try {
-			await emailService.sendEmail("wifi5324518@gmail.com", FORGOT_PASS);
+			await emailService.sendEmail("wifi5324518@gmail.com", emailActions.FORGOT_PASS);
 
 			res.json("Sanded");
 		} catch (e) {
@@ -78,5 +79,39 @@ module.exports = {
 		} catch (e) {
 			next(e);
 		}
-	}
+	},
+	forgotPassword: async (req, res, next) => {
+		try {
+			const user = req.user;
+
+			const actionToken = oauthService.generateActionToken(tokenActionsEnum.FORGOT_PASSWORD, {email: user.email});
+
+			await actionTokenService.create({
+				token: actionToken,
+				_user_id: user._id,
+				tokenType: tokenActionsEnum.FORGOT_PASSWORD
+			});
+
+			const forgotUrl = `${FRONTEND_URL}/password/restore?token=${actionToken}`;
+
+			await emailService.sendEmail("wifi5324518@gmail.com", emailActions.FORGOT_PASS, {forgotUrl});
+
+			res.json("Check your email");
+		} catch (e) {
+			next(e);
+		}
+	},
+	setPasswordAfterForgot: async (req, res, next) => {
+		try {
+			const hashPassword = await oauthService.hashPassword(req.body.password);
+
+			await actionTokenService.deleteOne({token: req.get("Authorization")});
+
+			await userService.updateById(req.user._id, {password: hashPassword});
+
+			res.json("Password has been restored. Try to login again");
+		} catch (e) {
+			next(e);
+		}
+	},
 };

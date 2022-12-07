@@ -1,7 +1,6 @@
 const {authValidator} = require("../validators");
-const {oauthService} = require("../services");
-const {OAuth} = require("../dataBases");
-const {tokenTypeEnum} = require("../enums");
+const {oauthService, actionTokenService} = require("../services");
+const {tokenTypesEnum, tokenActionsEnum} = require("../enums");
 const ApiError = require("../errors/ApiError");
 
 module.exports = {
@@ -18,7 +17,7 @@ module.exports = {
 			next(e);
 		}
 	},
-	checkAccessToken: (req, res, next) => {
+	checkAccessToken: async (req, res, next) => {
 		try {
 			const accessToken = req.get("Authorization");
 
@@ -28,7 +27,7 @@ module.exports = {
 
 			oauthService.checkToken(accessToken);
 
-			const tokenInfo = OAuth.findOne({accessToken});
+			const tokenInfo = await oauthService.findOne({accessToken});
 
 			if (!tokenInfo) {
 				throw new ApiError("No token in data base", 401);
@@ -41,7 +40,7 @@ module.exports = {
 			next(e);
 		}
 	},
-		checkRefreshToken: (req, res, next) => {
+	checkRefreshToken: async (req, res, next) => {
 		try {
 			const refreshToken = req.get("Authorization");
 
@@ -49,15 +48,43 @@ module.exports = {
 				throw new ApiError("No token", 401);
 			}
 
-			oauthService.checkToken(refreshToken, tokenTypeEnum.refreshToken);
+			oauthService.checkToken(refreshToken, tokenTypesEnum.refreshToken);
 
-			const tokenInfo = OAuth.findOne({refreshToken});
+			const tokenInfo = await oauthService.findOne({refreshToken});
 
 			if (!tokenInfo) {
 				throw new ApiError("No token in data base", 401);
 			}
 
 			req.tokenInfo = tokenInfo;
+			next();
+		} catch (e) {
+			next(e);
+		}
+	},
+	checkActionToken: async (req, res, next) => {
+		try {
+			const actionToken = req.get("Authorization");
+
+			if (!actionToken) {
+				throw new ApiError("No token", 401);
+			}
+
+			oauthService.checkAccessToken(actionToken, tokenActionsEnum.FORGOT_PASSWORD);
+
+			const tokenInfo = await actionTokenService.findOne({
+				token: actionToken,
+				tokenType: tokenActionsEnum.FORGOT_PASSWORD
+			});
+
+			if (!tokenInfo) {
+				throw new ApiError("Something wrong???!!!", 401);
+			}
+
+			tokenInfo.populate("_user_id");
+
+			req.user = tokenInfo._user_id;
+
 			next();
 		} catch (e) {
 			next(e);

@@ -2,7 +2,7 @@ const path = require("path");
 
 const nodemailer = require("nodemailer");
 const EmailTemplates = require("email-templates");
-const {NO_REPLAY_EMAIL, NO_REPLAY_EMAIL_PASSWORD} = require("../configs/config");
+const {NO_REPLAY_EMAIL, NO_REPLAY_EMAIL_PASSWORD, FRONTEND_URL} = require("../configs/config");
 const emailTemplates = require("../email-templates");
 const ApiError = require("../errors/ApiError");
 
@@ -28,7 +28,7 @@ const sendEmail = async (receiverEmail, emailAction, locals = {}) => {
 		}
 	});
 
-	Object.assign(locals || {}, {frontendURL: "google.com"});
+	locals.frontendURL = FRONTEND_URL;
 
 	const content = await templateRender.render(templateInfo.templateName, locals);
 

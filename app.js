@@ -3,7 +3,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 
 const {authRouter, carRouter, userRouter} = require("./routers");
-const configs = require("./configs/config");
+const {MONGO_URL, PORT} = require("./configs/config");
 
 const app = express();
 
@@ -15,7 +15,7 @@ app.use("/cars", carRouter);
 app.use("/auth", authRouter);
 
 app.get("/", (req, res) => {
-	res.json("Listening port 5000");
+	res.json(`Listening port ${PORT}`);
 });
 
 app.use((err, req, res, next) => {
@@ -25,7 +25,7 @@ app.use((err, req, res, next) => {
 	});
 });
 
-app.listen(5000, async () => {
-	await mongoose.connect(configs.MONGO_URL);
-	console.log("Server listen 5000");
+app.listen(PORT, async () => {
+	await mongoose.connect(MONGO_URL);
+	console.log(`Server listening ${PORT}`);
 });

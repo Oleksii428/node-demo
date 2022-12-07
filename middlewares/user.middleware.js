@@ -19,8 +19,6 @@ module.exports = {
 		} catch (e) {
 			next(e);
 		}
-
-
 	},
 	isBodyCreateValid: async (req, res, next) => {
 		try {

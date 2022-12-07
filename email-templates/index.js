@@ -1,4 +1,4 @@
-const {CONTENT, FORGOT_PASS} = require("../configs/email.actions");
+const {CONTENT, FORGOT_PASS} = require("../enums/email.actions.enum");
 module.exports = {
 	[CONTENT]: {
 		subject: "Content title",
