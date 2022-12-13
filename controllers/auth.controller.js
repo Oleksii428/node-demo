@@ -4,7 +4,7 @@ const {tokenActionsEnum, emailActions} = require("../enums");
 const {FRONTEND_URL} = require("../configs/config");
 
 module.exports = {
-	sendEmail: async (req, res, next) => {
+	sendEmailWelcome: async (req, res, next) => {
 		try {
 			const user = {
 				name: "Vasia",
@@ -18,9 +18,14 @@ module.exports = {
 			next(e);
 		}
 	},
-	sendEmail2: async (req, res, next) => {
+	sendEmailForgot: async (req, res, next) => {
 		try {
-			await emailService.sendEmail("wifi5324518@gmail.com", emailActions.FORGOT_PASS);
+			const user = {
+				name: "Vasia",
+				age: 22,
+				email: "wifi5324518@gmail.com"
+			};
+			await emailService.sendEmail("wifi5324518@gmail.com", emailActions.FORGOT_PASS, {userName: user.name});
 
 			res.json("Sanded");
 		} catch (e) {
@@ -82,19 +87,19 @@ module.exports = {
 	},
 	forgotPassword: async (req, res, next) => {
 		try {
-			const user = req.user;
+			const {_id, email, name} = req.user;
 
-			const actionToken = oauthService.generateActionToken(tokenActionsEnum.FORGOT_PASSWORD, {email: user.email});
+			const actionToken = oauthService.generateActionToken(tokenActionsEnum.FORGOT_PASSWORD, {email: email});
 
 			await actionTokenService.create({
 				token: actionToken,
-				_user_id: user._id,
+				_user_id: _id,
 				tokenType: tokenActionsEnum.FORGOT_PASSWORD
 			});
 
 			const forgotUrl = `${FRONTEND_URL}/password/restore?token=${actionToken}`;
 
-			await emailService.sendEmail("wifi5324518@gmail.com", emailActions.FORGOT_PASS, {forgotUrl});
+			await emailService.sendEmail("wifi5324518@gmail.com", emailActions.FORGOT_PASS, {userName: name, forgotUrl});
 
 			res.json("Check your email");
 		} catch (e) {

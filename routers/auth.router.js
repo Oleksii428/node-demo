@@ -12,7 +12,7 @@ router.post("/logoutAll", authMiddleware.checkAccessToken, authController.logout
 router.post("/password/forgot", userMiddleware.isUserExistsDynamically("email"), authController.forgotPassword);
 router.put("/password/forgot", authMiddleware.checkActionToken, authController.setPasswordAfterForgot);
 
-router.post("/email", authController.sendEmail);
-router.post("/email2", authController.sendEmail2);
+router.post("/email/welcome", authController.sendEmailWelcome);
+router.post("/email/forgot", authController.sendEmailForgot);
 
 module.exports = router;

@@ -1,7 +1,7 @@
 const path = require("path");
 
 const nodemailer = require("nodemailer");
-const EmailTemplates = require("email-templates");
+const hbs = require("nodemailer-express-handlebars");
 const {NO_REPLAY_EMAIL, NO_REPLAY_EMAIL_PASSWORD, FRONTEND_URL} = require("../configs/config");
 const emailTemplates = require("../email-templates");
 const ApiError = require("../errors/ApiError");
@@ -18,25 +18,31 @@ const sendEmail = async (receiverEmail, emailAction, locals = {}) => {
 
 	const templateInfo = emailTemplates[emailAction];
 
-	if (!templateInfo) {
+	if (!templateInfo?.subject || !templateInfo.templateName) {
 		throw new ApiError("Wrong template", 500);
 	}
 
-	const templateRender = new EmailTemplates({
-		views: {
-			root: path.join(process.cwd(), "email-templates")
-		}
-	});
+	const options = {
+		viewEngine: {
+			defaultLayout: "main",
+			layoutsDir: path.join(process.cwd(), "email-templates", "layouts"),
+			partialsDir: path.join(process.cwd(), "email-templates", "partials"),
+			extname: ".hbs",
+		},
+		extName: ".hbs",
+		viewPath: path.join(process.cwd(), "email-templates", "views")
+	};
+
+	transporter.use("compile", hbs(options));
 
 	locals.frontendURL = FRONTEND_URL;
-
-	const content = await templateRender.render(templateInfo.templateName, locals);
 
 	return transporter.sendMail({
 		from: "User name",
 		to: receiverEmail,
 		subject: templateInfo.subject,
-		html: content
+		template: templateInfo.templateName,
+		context: locals
 	});
 };
 
